@@ -4,12 +4,14 @@
 #include <algorithm>
 #include <fstream>
 #include <string>
+
 using namespace std;
+
 const int SIZE = 3;
 
-int findAlgebraicAdditions(int a, int b, const vector <vector <float>> &Matr)  // Находим алгебраические дополнения элементов матрицы
+double FindAlgebraicAdditions(int a, int b, const vector <vector <double>> &Matr)  // Находим алгебраические дополнения элементов матрицы
 {	
-	int i, j, val;
+	double val;
 	vector <int> IndexX = { 0, 1, 2 };    
 	vector <int> IndexY = { 0, 1, 2 };
 	IndexX.erase(IndexX.begin() + a);   // убираем (вычеркиваем) из расчета строку
@@ -21,6 +23,65 @@ int findAlgebraicAdditions(int a, int b, const vector <vector <float>> &Matr)  /
 	return val;
 }
 
+bool ReadMatrix(const char* fileName, vector <vector <double>> &result)
+{
+	ifstream inputFile(fileName);
+	if (!inputFile)
+	{
+		return false;
+	}
+
+	int i, j;
+	for (i = 0; i < SIZE; i++)            //загружаем матрицу из файла
+	{
+		for (j = 0; j < SIZE; j++)
+		{
+			inputFile >> result[i][j];
+		}
+	}
+
+	return true;
+}
+
+double FindDeterminant(const vector <vector <double>> &matrix)
+{
+	double determinant;
+	determinant = ((matrix[0][0] * matrix[1][1] * matrix[2][2]) + (matrix[0][1] * matrix[1][2] * matrix[2][0]) +  //вычисление определелителя
+		(matrix[1][0] * matrix[0][2] * matrix[2][1]) - (matrix[2][0] * matrix[1][1] * matrix[0][2]) -             //по формуле треуголников
+		(matrix[0][0] * matrix[2][1] * matrix[1][2]) - (matrix[1][0] * matrix[0][1] * matrix[2][2]));
+	return determinant;
+}
+
+bool InvertMatrix(vector <vector <double>> &result, vector <vector <double>> &matrix)
+{
+	int i, j;
+	double determinant = FindDeterminant(matrix);
+	if (determinant == 0)
+	{
+		return false;
+	}
+	for (i = 0; i < SIZE; i++)
+	{
+		for (j = 0; j<SIZE; j++)
+		{
+			result[j][i] = pow(-1, i + j) * FindAlgebraicAdditions(i, j, matrix) / determinant;   //находим обратную матрицу по формуле 
+		}                                                                                   // A^-1 = 1/|A| * A.т.(транспонированную)
+	}
+	return true;
+}
+
+void PrintResult(vector <vector <double>> &result)
+{
+	for (int i = 0; i<SIZE; i++) //выводим обратную матрицу
+	{
+		for (int j = 0; j<SIZE; j++)
+		{
+			cout << result[i][j] << "\t";
+		}
+		cout << endl;
+	}
+}
+
 int main(int argc, char* argv[])
 {
 	if (argc != 2)
@@ -29,41 +90,20 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	ifstream inputFile(argv[1]);
-	if (!inputFile)
+	vector <vector <double>> Matr(SIZE, vector<double>(SIZE)), inverseMatrix(SIZE, vector<double>(SIZE));
+
+	if (!ReadMatrix(argv[1], Matr))
 	{
-		return 2;
+		cout << "reading matrix failed!" << endl;
 	}
 
-	vector <vector <float>> Matr(SIZE, vector<float>(SIZE)), inverseMatrix(SIZE, vector<float>(SIZE));
-	int i, j;
-	for (i = 0; i < SIZE; i++)            //загружаем матрицу из файла
+	if (!InvertMatrix(inverseMatrix, Matr))
 	{
-		for (j = 0; j < SIZE; j++)
-		{
-			inputFile >> Matr[i][j];
-		}
+		cout << "matrix inversion failed!" << endl;
 	}
-	
-	float determinant;
-	determinant = ((Matr[0][0] * Matr[1][1] * Matr[2][2]) + (Matr[0][1] * Matr[1][2] * Matr[2][0]) +  //вычисление определелителя
-		(Matr[1][0] * Matr[0][2] * Matr[2][1]) - (Matr[2][0] * Matr[1][1] * Matr[0][2]) -             //по формуле треуголников
-		(Matr[0][0] * Matr[2][1] * Matr[1][2]) - (Matr[1][0] * Matr[0][1] * Matr[2][2]));
-
-	for (i = 0; i < SIZE; i++)    
+	else
 	{
-		for (j = 0; j<SIZE; j++)
-		{
-			inverseMatrix[j][i] = pow(-1, i+j) * findAlgebraicAdditions(i, j, Matr) / determinant;   //находим обратную матрицу по формуле 
-		}                                                                                   // A^-1 = 1/|A| * A.т.(транспонированную)
+		PrintResult(inverseMatrix);
 	}
-	
-	for (int i = 0; i<SIZE; i++) //выводим обратную матрицу
-	{
-		for (int j = 0; j<SIZE; j++)
-		{
-			cout << inverseMatrix[i][j] << "\t";
-		}
-		cout << endl;
-	}
+	system("pause");
 }
