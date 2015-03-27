@@ -9,17 +9,17 @@ using namespace std;
 
 const int SIZE = 3;
 
-double FindAlgebraicAdditions(int a, int b, const vector <vector <double>> &Matr)  // Ќаходим алгебраические дополнени€ элементов матрицы
+double FindAlgebraicAdditions(int a, int b, const vector <vector <double>> &matrix)  // Ќаходим алгебраические дополнени€ элементов матрицы
 {	
 	double val;
-	vector <int> IndexX = { 0, 1, 2 };    
-	vector <int> IndexY = { 0, 1, 2 };
-	IndexX.erase(IndexX.begin() + a);   // убираем (вычеркиваем) из расчета строку
-	IndexY.erase(IndexY.begin() + b);   // и столбец
-	val = (Matr[*min_element(IndexX.begin(), IndexX.end())][*min_element(IndexY.begin(), IndexY.end())] *  // находим алгебраическое дополнение
-		Matr[*max_element(IndexX.begin(), IndexX.end())][*max_element(IndexY.begin(), IndexY.end())] -     // как определитель матрицы 2х2
-		Matr[*min_element(IndexX.begin(), IndexX.end())][*max_element(IndexY.begin(), IndexY.end())] *     // без учета текущего столбца и строки
-		Matr[*max_element(IndexX.begin(), IndexX.end())][*min_element(IndexY.begin(), IndexY.end())]);     
+	vector <int> indexX = { 0, 1, 2 };    
+	vector <int> indexY = { 0, 1, 2 };
+	indexX.erase(indexX.begin() + a);   // убираем (вычеркиваем) из расчета строку
+	indexY.erase(indexY.begin() + b);   // и столбец
+	val = (matrix[*min_element(indexX.begin(), indexX.end())][*min_element(indexY.begin(), indexY.end())] *  // находим алгебраическое дополнение
+		matrix[*max_element(indexX.begin(), indexX.end())][*max_element(indexY.begin(), indexY.end())] -     // как определитель матрицы 2х2
+		matrix[*min_element(indexX.begin(), indexX.end())][*max_element(indexY.begin(), indexY.end())] *     // без учета текущего столбца и строки
+		matrix[*max_element(indexX.begin(), indexX.end())][*min_element(indexY.begin(), indexY.end())]);
 	return val;
 }
 
@@ -90,14 +90,14 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	vector <vector <double>> Matr(SIZE, vector<double>(SIZE)), inverseMatrix(SIZE, vector<double>(SIZE));
+	vector <vector <double>> originalMatrix(SIZE, vector<double>(SIZE)), inverseMatrix(SIZE, vector<double>(SIZE));
 
-	if (!ReadMatrix(argv[1], Matr))
+	if (!ReadMatrix(argv[1], originalMatrix))
 	{
 		cout << "reading matrix failed!" << endl;
 	}
 
-	if (!InvertMatrix(inverseMatrix, Matr))
+	if (!InvertMatrix(inverseMatrix, originalMatrix))
 	{
 		cout << "matrix inversion failed!" << endl;
 	}
